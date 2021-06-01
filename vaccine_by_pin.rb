@@ -48,11 +48,11 @@ JSON.parse(response.body)['centers'].each do |center|
     if session["available_capacity_dose#{dose_number}"].positive? &&
        vaccine_types.any? { |v| session['vaccine'] == v } &&
        session['min_age_limit'] <= age
-
-      play_sound.call(center['name'])
+      
       message << center['name']
     end
   end
 end
 
-MESSAGE_ENABLED && !message.empty? && send_message.call(message.join(" "))
+play_sound.call(message.uniq.join(" and "))
+MESSAGE_ENABLED && !message.empty? && send_message.call(message.uniq.join(" "))
