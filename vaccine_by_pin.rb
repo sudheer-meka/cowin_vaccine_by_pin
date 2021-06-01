@@ -7,7 +7,7 @@ require 'time'
 require 'json'
 require 'twilio-ruby'
 
-MESSAGE_ENABLED = true
+MESSAGE_ENABLED = false
 
 pincode = 508001
 date = Date.today
