@@ -6,15 +6,15 @@ require 'date'
 require 'time'
 require 'json'
 
-pincode = 500034
+pincode = 508001
 date = Date.today
-vaccine_type = 'COVAXIN' # OR COVISHIELD
-dose_number = 2
-age_limit = 45
+vaccine_types = ['COVISHIELD', 'COVAXIN'] # OR COVISHIELD
+dose_number = 1
+age = 30
 
-play_sound = lambda do
+play_sound = lambda do |center|
   time = Time.now
-  system 'say book vaccine' while (time + 60) > Time.now # makes noise for a minute
+  system "say slots available at #{center}" while (time + 5) > Time.now # makes noise for a minute
 end
 base_url = "https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin"
 url = URI("#{base_url}?pincode=#{pincode}&date=#{date.strftime('%d-%m-%Y')}")
@@ -23,9 +23,13 @@ https.use_ssl = true
 
 request = Net::HTTP::Get.new(url)
 response = https.request(request)
-sessions = JSON.parse(response.body)['centers'].map { |c| c['sessions'] }.flatten
-sessions&.find do |session|
-  session["available_capacity_dose#{dose_number}"].positive? &&
-    session['vaccine'] == vaccine_type &&
-    session['min_age_limit'] == age_limit
-end && play_sound.call
+JSON.parse(response.body)['centers'].each do |center|
+  center['sessions']&.each do |session|
+    if session["available_capacity_dose#{dose_number}"].positive? &&
+       vaccine_types.any? { |v| session['vaccine'] == v } &&
+       session['min_age_limit'] <= age
+
+      play_sound.call(center['name'])
+    end
+  end
+end
